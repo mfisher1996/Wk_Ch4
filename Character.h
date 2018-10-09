@@ -1,16 +1,12 @@
 //
 //  Character.h
-//  Wk_ch4
-//
-//  Created by Mason Fisher on 9/25/18.
-//  Copyright © 2018 Mason Fisher. All rights reserved.
-//
 
 #ifndef Character_h
 #define Character_h
 
 #include <ctime>
 #include <cstdlib>
+#include <iomanip>
 
 using namespace std;
 
@@ -22,9 +18,9 @@ protected:
     int * inventory;
     int length;
     int MAX_TURN =100;
-    int hp;
-    int numb();
+    int numb(int a, int b);
 public:
+    int hp;
     Character();
     ~Character();
     bool isBroke();
@@ -47,6 +43,7 @@ Character::Character(){
     srand(time(NULL));
     hp = 2000;
     inventory = new int[MAX_TURN];
+    length=0;
 }
 
 Character::~Character(){
@@ -55,107 +52,157 @@ Character::~Character(){
 
 bool Character::isBroke(){
     if( hp > 0)
-        return 0;
+        return false;
     else
-        return 1;
+        return true;
 }
 
 void Character::getItem(int& a,int& b){
-    cout << "The 'Friar' offers you two goods: \n";
+    cout<< "+======================================+" <<endl;
+    cout<< "| The 'Friar' offers you two goods:    |" << endl;
+    cout<< "|--------------------------------------|" <<endl;
+    cout<< "|                                      |" << endl;
     a = rand()%4;
     b = rand()%4;
-    cout << "1. " << ITEMS[a] << " for " << PRICES[a] << " hp \nOr\n";
-    cout << "2. " << ITEMS[b] << " for " << PRICES[b] << " hp\n";
+
+    string itemA = ITEMS[a];
+    string itemB = ITEMS[b];
+
+    cout<< "| 1. " << ITEMS[a] << " for " << PRICES[a] << " hp";
+    if(PRICES[a] > 999 )
+    {   //40 is the size of the text box, itemA.size is
+        //the number of spaces the item name takes up.
+        //5 is for the spaces the price takes up.
+        //12 is for the "| 1. "...." sting.
+        //Makes the text box look right.
+        cout<< setw(40-(itemA.size()+5+12)) << "|" << endl;
+    }
+    else
+    {
+        cout<< setw(40-(itemA.size()+4+12)) << "|" << endl;
+    }
+    cout<< "|                                      |" << endl;
+    cout<< "| OR                                   |" << endl;
+    cout<< "|                                      |" << endl;
+    cout<< "| 2. " << ITEMS[b] << " for " << PRICES[b] << " hp";
+    if(PRICES[b] > 999 )
+    {
+        cout<< setw(40-(itemB.size()+5+12)) << "|" << endl;
+    }
+    else
+    {
+        cout<< setw(40-(itemB.size()+4+12)) << "|" << endl;
+    }
+    cout<< "|                                      |" << endl;
+    cout<< "+======================================+" << endl;
+
 }
 
 int Character::buyItem(int a,int b){
-    cout << "Which item would you like?\n";
-    int i =numb();
+    cout << "Which item would you like? ";
+    int i =numb(1,2);
     if(i==1){
-        ++*inventory = a;
+        inventory[length] = a;
+        hp-=PRICES[a];
+        cout << "\n\t*You bought the " << ITEMS[inventory[length]] << "\n";
         length++;
-        return a;
+        return i;
     }
     else{
+        inventory[length] = b;
+        hp-=PRICES[b];
+        cout << "\n\t*You bought the " << ITEMS[inventory[length]] << "\n";
         length++;
-        ++*inventory = a;
-        return b;
+        return i;
     }
 }
 
 void Character::takeItem(int i, int a, int b){
-    if(i==0){
-        cout << "You take the " << ITEMS[b];
-        ++*inventory = b;
+    if(i==1){
+        cout << "\n\t*You take the " << ITEMS[b];
+        inventory[length] = b;
         length++;
+        hp-=PRICES[b];
     }else{
-        cout << "You take the " << ITEMS[a];
-        ++*inventory = a;
+        cout << "\n\t*You take the " << ITEMS[a];
+        inventory[length] = a;
         length++;
+        hp-=PRICES[a];
     }
 }
 
-int Character::numb()
+int Character::numb(int a, int b)
 {
     int num=0;
-    clear();
     std::cin >> num;
-    
-    while(!num)
-    {
+
+    while(num!=a&&num!=b){
         clear();
         std::cout << "Invalid input.\n";
-        std::cout << "Please input a number: ";
+        std::cout << "Please input either 1 or 2: ";
         std::cin >> num;
     }
-    clear();
+
     return num;
 }
 void Character::printList()
 {
     int spentHp = 2000 - hp;    // To get how much total hp the character spent.
-    string TAB = "\t\t";
-    
-    cout<< TAB << "Player's Results:" << endl;
-    cout<< "\t---------------------------------" << endl;
-    cout<< "\t*There are " << length              //Inventory size.
+
+
+    cout<< "Player's Results:" << endl;
+    cout<< "---------------------------------" << endl;
+    cout<< "*There are " << length              //Inventory size.
     << " items in the player's inventory." << endl;
-    cout<< "\t*The player's inventory contains: " << endl;
-    
+    cout<< "*The player's inventory contains: " << endl;
+
     for(int i = 0; i < length; i++)
     {
-        
-        cout<< "\t   " << i+1 << ". " << inventory[i];   //The item's in the inventory.
-        
+
+        cout<< "  " << i+1 << ". " << ITEMS[inventory[i]];   //The item's in the inventory.
+
         if(i < length - 1)
         {
             cout<< endl;
         }
     }
-    
-    cout<< "\n\t*The player spent: " << spentHp << " HP." << endl;  //How much hp was spent.
-    cout<< "\t*The player's balance is: " << hp << " HP." << endl;  //Remaining hp.
+
+    cout<< "\n*The player spent: " << spentHp << " HP." << endl;  //How much hp was spent.
+    cout<< "*The player's balance is: " << hp << " HP." << endl;  //Remaining hp.
 }
 
 
 
 int Warrior::buyItem(int a, int b){
     int i;
-    if(PRICES[a]<PRICES[b])
+    if(PRICES[a]<PRICES[b]){
+        cout << "\n\t*The warrior chooses: " << ITEMS[a]<< "\n";
         i = 1;
-    else
+        Warrior::hp-=PRICES[a];
+        Warrior::inventory[length] = a;
+        Warrior::length++;
+    }
+    else{
+        cout << "\n\t*The warrior chooses: " << ITEMS[b] << "\n";
         i = 2;
-    cout << "The warrior choses:" << ITEMS[i] << endl;
+        Warrior::hp-=PRICES[b];
+        Warrior::inventory[length] = b;
+        Warrior::length++;
+    }
     return i;
 }
 
 void Warrior::takeItem(int i, int a, int b){
-    if(i==0){
-        cout << "The warrior takes the " << ITEMS[b];
-        ++*inventory = b;
-    }else{
-        cout << "The warrior takes the " << ITEMS[a];
-        ++*inventory = a;
+    if(i==1){
+        cout << "\n\t*The warrior takes the " << ITEMS[b];
+        Warrior::inventory[length] = b;
+        Warrior::length++;
+        hp-=PRICES[b];
+    }else if(i==2){
+        cout << "\n\t*The warrior takes the " << ITEMS[a];
+        inventory[length] = a;
+        length++;
+        hp-=PRICES[a];
     }
 }
 
@@ -163,26 +210,26 @@ void Warrior::printList()
 {
     int spentHp = 2000 - hp;    //To get the total amount of hp the warrior spent.
     string TAB = "\t\t";
-    
-    cout<< TAB << "Warrior's Results:" << endl;
-    cout<< "\t---------------------------------" << endl;
-    cout<< "\t*There are " << length             //Inventory size.
+
+    cout<< "Warrior's Results:" << endl;
+    cout<< "---------------------------------" << endl;
+    cout<< "*There are " << length             //Inventory size.
     << " items in the warrior's inventory." << endl;
-    cout<< "\t*The warrior's inventory contains: " << endl;
-    
+    cout<< "*The warrior's inventory contains: " << endl;
+
     for(int i = 0; i < length; i++)
     {
-        
-        cout<< "\t   " << i+1 << ". " << inventory[i];   //The specific item's in the warrior's inventory.
-        
+
+        cout<< "  " << i+1 << ". " << ITEMS[inventory[i]];   //The specific item's in the warrior's inventory.
+
         if(i < length - 1)
         {
             cout<< endl;
         }
     }
-    
-    cout<< "\n\t*The warrior spent: " << spentHp << " HP." << endl; //Total amount of hp spent.
-    cout<< "\t*The warrior's balance is: " << hp << " HP." << endl; //Remaining Hp.
+
+    cout<< "\n*The warrior spent: " << spentHp << " HP." << endl; //Total amount of hp spent.
+    cout<< "*The warrior's balance is: " << hp << " HP." << endl; //Remaining Hp.
 }
 
 #endif /* Character_h */
